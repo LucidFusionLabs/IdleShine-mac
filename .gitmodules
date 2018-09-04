@@ -1,0 +1,6 @@
+[submodule "IdleShine"]
+	path = IdleShine
+	url = https://github.com/LucidFusionLabs/IdleShine
+[submodule "core"]
+	path = core
+	url = https://github.com/LucidFusionLabs/core

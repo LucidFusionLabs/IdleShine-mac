@@ -1,0 +1,50 @@
+language: objective-c
+osx_image: xcode9.3
+if: tag =~ ^v
+git:
+  submodules: false
+
+before_install:
+  - git submodule update --init --recursive IdleShine
+  - git submodule update --init core
+  - cd core
+  - git submodule update --init --recursive CMake imports/cmake-precompiled-header imports/libpng imports/giflib imports/libjpeg-turbo imports/osx/fabric-osx
+  - cd ..
+  - echo $TRAVIS_OS_NAME
+  - echo $LANG
+  - echo $LC_ALL
+  - pwd
+  - cmake --version
+  - brew install xcproj nasm yasm makedepend
+
+before_script:
+  - openssl aes-256-cbc -k $CERTIFICATE_PASSWORD -in fastlane/Certificates/distribution.p12.enc -d -a -out fastlane/Certificates/distribution.p12
+  - gem update fastlane
+
+script:
+  - mkdir osx && cd osx
+  - cmake -GXcode -DCMAKE_BUILD_TYPE=Release -DCMAKE_TOOLCHAIN_FILE=../core/CMake/OSXToolchain.cmake ..
+  - mkdir -p Project.xcodeproj/xcshareddata/xcschemes
+  - cp ../xcscheme/* Project.xcodeproj/xcshareddata/xcschemes
+  - grep -v INSTALL_PATH Project.xcodeproj/project.pbxproj > Project.xcodeproj/project.pbxproj.new
+  - mv Project.xcodeproj/project.pbxproj.new Project.xcodeproj/project.pbxproj
+  - xcproj touch Project.xcodeproj || true
+  - xcproj touch Project.xcodeproj || true
+  - xcproj touch Project.xcodeproj || true
+  - xcproj touch Project.xcodeproj
+  - cd ..
+  - core/script/AddFabricBuildPhaseToXcodeprojTarget.sh osx osx/Project.xcodeproj IdleShine
+  - xcodebuild -project osx/Project.xcodeproj -target libjpeg-turbo -configuration Release | xcpretty
+  - fastlane submit_testflight
+
+after_success:
+  - echo "success"
+
+after_failure:
+  - echo "failure"
+
+env:
+  global:
+  - CRASHLYTICS_API_TOKEN=b8bfc53a14ff223e3cf7df5039c377bdac3ca074
+  - secure: G0lHbBWI2YP3CGHQghDUzyAZP33gkYMaiotNUg8sEw9TP+BcnennzbSFa5b08zyHH7TUTGyQm0o4AHe+hMT2MVje1JJgqa/hONkBGJDaGKKP/3W/HC3oxK5h2chF9IKOP0k3prU0KMHOqb9pGaBvb+znGWwhxnR75pACNHw5QRMk0WFUMiqumKpA+k10mxcqFMDWLH9sTrPOd2FH7N4W+5fjKXrc2HGAUywyKDk9OLyABJWDXs2vgqaJNsPILyErhsomwRyVhsj46wlC7WQTfop9vnqIBvpyjz1BVX1XB2YjiE4kWUI7IhvzpBRYoztPqBobcyGG6syTQT92kxHoKzPtp7jXFmZbjfAdi98ExFQu9ypgQ4eJUFRdR1xTXJj5Zry2+ObE0M+MD1KIOqo0DBo2kfvJUZVieUyu+d2v0Bkpq65t5VlnYDJACnXciYimPsp6mgzHzanGqNK9OYdGWzwcGqGxXBsstTwzRjqLoIeJUAPW7kmLtqmQFzszW3gXCBpGzbrUonG7auUfMPctsu/xBr6UFJQY0+44mTtrcsiA3x0uHIvqIUpegv/LSHyx+15cECeQ3cPva5RcHpzQlfYyMVkfK9m/WpMGiDDWDJZLiHCJGn5rsZfwmk8VFf/wruAdOf0alHo7amw4V4ACb8ybRCljvuTbPfdHFHOh80A=
+  - secure: fufiYr+YGLJz6Ocg2HqBVBb5JOcPpL85ZEyz8cJ5tHRR++OW9uAaekJLgHMIJN7PcV4cAemNz5luXxilZ5B2WbjQz3MgA6GFL7tcWsqNGZ/SA5+uRv3/0jJlb+ZPxS3bG+J8D5ezJXyboFS5nHx31UjuYWKCLuOPulPV3mH19eGTWnYmSvzimMx+K3x5kzXtzy/4Itgfg5avMlqWP4Gci/LrgVhHHHMYsYNO0mecYkMtpV6Wbxewqu8AXv5YHK2zsoX5b8i31Gdg70HaoKpCgHotUCv88gemLJkgac/L0luWjJWYDZAi2WNYwT40B4I2NqdbRilh89DEUTR00rNQjVxKmST+jd1iy04CQZuXBPJUvNv6ztZXCl0eKs+qNZL3BH0p3fJiBi34qkjCGTFheYnWSSOmdh5oVI2wo4UIyx7T9McCxoNfpFsZcIlJ0n3roN+tvcOQI3Su2sspZ2WnW1/XIUGNmyVlHKBeK0/noZcTATORtb3erNhIDqByloMJiA8igtRuClUn5yYhvSuTJ8R6520/rjx7bgj7tQLuQRtYGF28Qc/kf8tLZMYh7oiMxN6n9BmzQBAl6rs+T4sMdBGe9L57ARcnEDynGjywJ5KwxxB4zikrQe6JHsXmevKnUQpNaK7XGjA8fY86leneBmB09Aned42+V5q4t4Ee2Co=
