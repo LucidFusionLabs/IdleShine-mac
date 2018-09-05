@@ -19,6 +19,7 @@ before_install:
 
 before_script:
   - openssl aes-256-cbc -k $CERTIFICATE_PASSWORD -in fastlane/Certificates/distribution.p12.enc -d -a -out fastlane/Certificates/distribution.p12
+  - openssl aes-256-cbc -k $CERTIFICATE_PASSWORD -in fastlane/Certificates/IdleShine_Distribution.provisionprofile.enc -d -a -out fastlane/Certificates/IdleShine_Distribution.provisionprofile
   - gem update fastlane
 
 script:
@@ -35,7 +36,7 @@ script:
   - cd ..
   - core/script/AddFabricBuildPhaseToXcodeprojTarget.sh osx osx/Project.xcodeproj IdleShine
   - xcodebuild -project osx/Project.xcodeproj -target libjpeg-turbo -configuration Release | xcpretty
-  - fastlane submit_testflight
+  - fastlane deliver_macstore
 
 after_success:
   - echo "success"

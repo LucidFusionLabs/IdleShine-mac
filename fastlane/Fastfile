@@ -1,5 +1,5 @@
-desc "Build and submit to TestFlight"
-lane :submit_testflight do
+desc "Build and submit to Mac App Store"
+lane :deliver_macstore do
 
   team_id = "9S723G94YQ"
   keychain_name = "fastlane_certs"
@@ -21,11 +21,6 @@ lane :submit_testflight do
     keychain_password: keychain_pw
   )
 
-  sigh(
-    username: "LucidFusionLabs@gmail.com",
-    provisioning_name: "IdleShine Distribution",
-    team_id: team_id)
-
   gym(
     clean: true,
     project: "osx/Project.xcodeproj",
@@ -33,12 +28,14 @@ lane :submit_testflight do
     configuration: "Release",
     include_bitcode: false,
     include_symbols: true,
-    export_team_id: team_id
+    export_team_id: team_id,
+    export_method: "package"
   ) 
 
-  pilot(
+  deliver(
     username: "LucidFusionLabs@gmail.com",
-    skip_submission: true,
-    skip_waiting_for_build_processing: true
+    skip_screenshots: true,
+    skip_metadata: true,
+    force: false
   )
 end
