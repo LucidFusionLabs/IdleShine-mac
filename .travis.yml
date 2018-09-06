@@ -20,6 +20,7 @@ before_install:
 before_script:
   - openssl aes-256-cbc -k $CERTIFICATE_PASSWORD -in fastlane/Certificates/distribution.p12.enc -d -a -out fastlane/Certificates/distribution.p12
   - openssl aes-256-cbc -k $CERTIFICATE_PASSWORD -in fastlane/Certificates/IdleShine_Distribution.provisionprofile.enc -d -a -out fastlane/Certificates/IdleShine_Distribution.provisionprofile
+  - cp fastlane/Certificates/IdleShine_Distribution.provisionprofile ~/Library/MobileDevice/Provisioning\ Profiles/`grep UUID -A1 -a fastlane/Certificates/IdleShine_Distribution.provisionprofile | grep -io "[-A-F0-9]\{36\}"`.provisionprofile
   - gem update fastlane
 
 script:

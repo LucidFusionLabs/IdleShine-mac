@@ -29,13 +29,14 @@ lane :deliver_macstore do
     include_bitcode: false,
     include_symbols: true,
     export_team_id: team_id,
-    export_method: "package"
+    export_method: "app-store"
   ) 
 
   deliver(
     username: "LucidFusionLabs@gmail.com",
     skip_screenshots: true,
     skip_metadata: true,
-    force: false
+    force: false,
+    platform: "osx"
   )
 end
